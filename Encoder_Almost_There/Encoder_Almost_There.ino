@@ -15,7 +15,7 @@
   int bake;
   int aState;
   int revsCount = 0;
-int ana_Speed = map (pwm_speed,0,100,0,255); //Ask software team, how will the motor know to change spin direction? 
+  int ana_Speed = map (pwm_speed,0,100,0,255); //Ask software team, how will the motor know to change spin direction? 
 
 void setup() {
 
