@@ -18,9 +18,9 @@
   int16_t e_dif = 0;  // Time derivative of error, used for differential control
   int16_t old_error = 0; // Calculated error from the last controller loop
   int16_t e_sum = 0; // Error summation
-  double Kp = 0.5;  // Controller gains
-  double Kd = 0.3;
-  double Ki = 0.0025;
+  double Kp = 0.3;  // Controller gains
+  double Kd = 0.5;
+  double Ki = 0.0015;
   int16_t Pout = 0;  // Proportional control output
   int16_t Dout = 0;  // Derivative control output
   int16_t Iout = 0;  // Integral control output
@@ -47,18 +47,14 @@ void loop() {
 
   // Reset all control loop variables
   i = 0; 
-  error = 0;
-  counter = 0;
   e_sum = 0;
   old_error = 0;
   
-  set_pt = random(-1500, 1500); // Choose a random setpoint each loop
+  set_pt = random(-2500, 2500); // Choose a random setpoint each loop
+  //set_pt = 800;           
 
-  Serial.print('Set Point = ');  // display desired encoder position
-  Serial.println(set_pt);            
-
-  for (i=0; i<5000; i++) // Run the controller for 5 seconds
-    {
+  for (i=0; i<1000; i++) // Run the controller for 5 seconds
+    { 
       pos = counter; // Determine current motor angular position 
       
       error = set_pt - pos;  // obtain positional error by comparing to desired angular position
@@ -88,32 +84,35 @@ void loop() {
       }
       
       analogWrite(PWM, act); // Output control signal to motor PWM
-      Serial.println(counter);
+      Serial.print(set_pt);
+      Serial.print(", ");
+      Serial.print(counter);
+      Serial.println(" ");
       delay(dt); //sets function to run once, per ms
     }
 }
 
 // Truth table for encoder signals
-// A rising and B low = CW motion
-// A rising and B high = CCW motion
-// B rising and A low = CCW motion
-// B rising and A high = CW motion
+// A rising and B low = CW motion (-)
+// A rising and B high = CCW motion (+)
+// B rising and A low = CCW motion (+)
+// B rising and A high = CW motion (-)
 
 void A_Rise() { // Interrupt Service Routine for when encoder A reading transitions from low to high (Rising edge)
   if (digitalRead(outputB)){  // If encoder B is high (and A is rising), the motor is moving Counter Clock Wise
-    counter --; // CCW = decrement
+    counter ++; // CCW = increment
   }
   else{
-    counter ++; // CW = increment
+    counter --; // CW = decrement
   }
 }
 
 void B_Rise() { // Interrupt Service Routine for when encoder B reading transitions from low to high (Rising edge)
   if (digitalRead(outputA)){  // If encoder A is high (and B is rising), the motor is moving Clock Wise
-    counter ++; // CW = increment
+    counter --; // CW = decrement
   }
   else{
-    counter --; // CCW = decrement
+    counter ++; // CCW = increment
   }
 }
 
